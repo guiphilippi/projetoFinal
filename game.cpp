@@ -170,59 +170,34 @@ bool game::movimento(int x, int y, bloco *inicio) {
 
        else if (fim->Tipo()==monstro&&inicio->Tipo()==jogador) {tela[0]->setText(QString("Voce perdeu!")); ativo = false;}
 
-/*
-    int ctrl = 0;
-    while (ctrl<5) {
+       mudanca(5);
 
-        bool res = mudanca();
-
-        ctrl++;
-
-        if(res==true) ctrl=10;
-    }
-*/
   }
     return return_;
 }
 
-bool game::mudanca() {
+bool game::mudanca(int cont) {
 
-    tipo tipo_;
     bool return_ = false;
-    int x, y;
-    int i = QRandomGenerator::global()->bounded(0,this->rowCount()-1);
-    int j = QRandomGenerator::global()->bounded(0,this->columnCount()-1);
+    int ctrl = 0;
+    while (ctrl<cont) {
 
-    //for (int i = 0; i < 2; ++i) {
+        int x = QRandomGenerator::global()->bounded(-1,1);
+        int y = QRandomGenerator::global()->bounded(-1,1);
+        int i = QRandomGenerator::global()->bounded(0,rowCount()-1);
+        int j = QRandomGenerator::global()->bounded(0,columnCount()-1);
 
-        //for (int j = 0; j < 2; ++j) {
+        bloco *temp = Bloco(i,j);
 
-            tipo_ = Bloco(i,j)->Tipo(); //tag[(i*this->columnCount())+j];
+        if(temp->Tipo()==movel || temp->Tipo()==monstro || temp->Tipo()==amigo) {
 
-            if(tipo_==movel || tipo_==monstro) {
+            return_ = movimento(x,y,temp);
+        }
 
-                //if ((random() % 5) == 0) {
+        ctrl++;
 
-                   x = QRandomGenerator::global()->bounded(-1,1);
-                   y = QRandomGenerator::global()->bounded(-1,1);
+        if(return_==true) ctrl=cont+1;
+    }
 
-                   QPoint pt(i,j);
-
-                   //ponto->setX(i);
-                   //ponto->setY(j);
-
-                   //return_ = movimento(x,y,&pt);
-
-                   //delete &pt;
-
-                   //delete ponto1;
-
-                   //tela->setText(QString("%1 %2 %3 %4 %5").arg(i).arg(j).arg(x).arg(y).arg(bloco));
-                //}
-
-            }
-
-            return return_;
-        //}
-    //}
+    return return_;
 }

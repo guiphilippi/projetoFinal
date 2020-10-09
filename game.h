@@ -61,7 +61,7 @@ public:
     game(int rows, int columns, QWidget *parent, QLabel *tela_[2]);
     bool movimento(int x, int y, bloco *inicio);
     void setbloco(int x, int y, tipo tp);
-    bool mudanca();
+    bool mudanca(int cont);
     bloco *Bloco(int x, int y);
     bloco *Bloco(QPoint pt);
 //private:
