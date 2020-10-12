@@ -116,4 +116,3 @@ void Interface::vec_11() {jogo->movimento(1,-1,jogo->jogador1->bloco_);}
 void Interface::vec1_1() {jogo->movimento(-1,1,jogo->jogador1->bloco_);}
 void Interface::vec11() {jogo->movimento(1,1,jogo->jogador1->bloco_);}
 void Interface::vec_1_1() {jogo->movimento(-1,-1,jogo->jogador1->bloco_);}
-
