@@ -2,79 +2,52 @@
 
 #include "game.h"
 
-// *** bloco
+//--- interacao - "get/set" - bloco - cores - construtores - setbloco - soma - mensagens - acao/reacao - movimento - mudanca - lista - game()
 
-QPoint bloco::posicao() {return QPoint(row(),column());}
+//*** interacao
+
+interacao::interacao(bloco *ativo1, QPoint vetor1) {ativo_ = ativo1; vetor_ = vetor1; return_ = false;}
+
+bloco *interacao::ativo() {return ativo_;}
+bloco *interacao::reativo() {return ativo()->deslocado(vetor());}
+QPoint interacao::vetor() {return vetor_;}
+game *interacao::jogo() {return ativo()->jogo();}
+bool interacao::_true() {return_ = true; return return_;}
+bool interacao::_return() {return return_;}
+void interacao::_return(bool b) {return_ = b;}
+
+//*** "get/set"
+
 game *bloco::jogo() {return (game*) tableWidget();}
+QPoint bloco::posicao() {return QPoint(row(),column());}
+entidade *bloco::Entidade() {return entidade_;}
+void bloco::Entidade(entidade *ent) {entidade_ = ent;}
 
-bloco *bloco::deslocado(int x, int y) {return jogo()->Bloco(this->posicao() + QPoint(x,y));}
+QPoint movel_::posicao() {return Bloco()->posicao();}
+bloco *movel_::Bloco() {return bloco_;}
+void movel_::Bloco(bloco *b) {bloco_ = b;}
 
-void bloco::deslocamento(bloco *fim) {entidade_->setbloco(fim); jogo()->livre1->setbloco(this);}
-
-bool bloco::deslocamento(int x, int y) {deslocamento(deslocado(x,y)); return true;}
-
-bool bloco::finaliza(QString texto) {if(entidade_==jogo()->jogador1) {jogo()->tela[0]->setText(QString(texto)); jogo()->ativo = false;} return false;}
-
-bool bloco::tenta_mover(int x, int y) {return this->deslocado(x,y)->entidade_->reacao(x, y, this);}
-
-// *** entidade
-
-void entidade::setbloco(bloco *bloco_) {bloco_->setBackground(cor()); bloco_->setText(QString("")); bloco_->entidade_ = this;}
-bool entidade::reacao(int x, int y, bloco *inicio) {return false;}
-void entidade::acao() {}
-int entidade::pontuacao() {return 0;}
-bool entidade::soma(bloco *b) {return false;}
-//bloco *entidade::Bloco() {}
-
-//***pontuavel
-
-pontuavel::pontuavel() {pontuacao(0);}
-pontuavel::pontuavel(int x, int y) {pontuacao(QRandomGenerator::global()->bounded(x,y));}
-
-void pontuavel::setbloco(bloco *bloco_) {entidade::setbloco(bloco_); bloco_->setText(QString("%1").arg(this->pontuacao()));}
-bool pontuavel::reacao(int x, int y, bloco *inicio) {return inicio->entidade_->soma(inicio->deslocado(x,y));}
 int pontuavel::pontuacao() {return pontuacao_;}
 void pontuavel::pontuacao(int valor) {pontuacao_ = valor;}
-bool pontuavel::soma(bloco *b) {pontuacao_ += b->entidade_->pontuacao(); delete b->entidade_; return true;}
 
-//*** autonomo
+bloco *game::Bloco(int x, int y) {return (bloco*) item(x,y);}
+bloco *game::Bloco(QPoint ponto) {return Bloco(ponto.x(),ponto.y());}
 
-void autonomo::acao() {
+// *** bloco
 
-    int x = QRandomGenerator::global()->bounded(-1,2);
-    int y = QRandomGenerator::global()->bounded(-1,2);
+bloco *bloco::deslocado(QPoint vetor) {return jogo()->Bloco(this->posicao() + vetor);}
 
-    Bloco()->tenta_mover(x,y);
-}
-bloco *autonomo::Bloco() {return bloco_;}
-void movel_::acao() {autonomo::acao();}
-void monstro_::acao() {autonomo::acao();}
-void movel_::setbloco(bloco *b) {entidade::setbloco(b); bloco_ = b;}
-void monstro_::setbloco(bloco *b) {pontuavel::setbloco(b); bloco_ = b;}
+void bloco::atualiza() {Entidade()->setbloco(this);}
 
-//*** lista
+void bloco::deslocamento(QPoint vetor) {Entidade()->setbloco(deslocado(vetor)); jogo()->ocupavel->setbloco(this);}
 
-lista::lista() {
-
-    entidades = new entidade*[30];
-    quantidade = 0;
-}
-
-void lista::adiciona(entidade *ent) {if(quantidade < 35) {entidades[quantidade] = ent; quantidade++;}}
+bool bloco::tenta_mover(QPoint vetor) {return deslocado(vetor)->Entidade()->acao(interacao(this, vetor));}
 
 //*** entidades
 
-      //*** construtores & destrutores
-
-      bonus_::bonus_(int x, int y) : pontuavel(x, y) {}
-      inativo_::inativo_(int x, int y) : pontuavel(x, y) {}
-      amigo_::amigo_(bloco *bloco_) : pontuavel() {setbloco(bloco_);}
-      monstro_::monstro_(lista *lista_) : pontuavel() {lista_->adiciona(this);}
-      movel_::movel_(lista *lista_) {lista_->adiciona(this);}
-
       //*** cores
 
-      QColor livre_::cor() {return Qt::white;}
+      QColor ocupavel_::cor() {return Qt::white;}
       QColor obstaculo_::cor() {return Qt::black;}
       QColor movel_::cor() {return Qt::gray;}
       QColor empurravel_::cor() {return Qt::yellow;}
@@ -85,70 +58,135 @@ void lista::adiciona(entidade *ent) {if(quantidade < 35) {entidades[quantidade] 
       QColor inativo_::cor() {return Qt::darkMagenta;}
       QColor jogador_::cor() {return Qt::blue;}
 
+      //QColor criatura::cor() {return Qt::darkYellow;}
+
+      //*** construtores & destrutores
+
+      bloco::bloco(int x, int y, entidade *ent, game *jogo) {jogo->setItem(x,y,this); ent->setbloco(this);}
+      void game::criaBloco(int x, int y, entidade *ent) {new bloco(x,y,ent,this);}
+      bloco::~bloco() {if(Entidade()) delete Entidade();}
+
+      entidade::~entidade() {}
+      pontuavel::~pontuavel() {}
+      //movel_::~movel_() {}
+
+      pontuavel::pontuavel() {pontuacao(0);}
+      pontuavel::pontuavel(int x, int y) {pontuacao(QRandomGenerator::global()->bounded(x,y));}
+
+      movel_::movel_() {}
+      movel_::movel_(lista *lista_) {lista_->adiciona(this);}
+
+      bonus_::bonus_(int x, int y) : pontuavel(x, y) {}
+      inativo_::inativo_(int x, int y) : pontuavel(x, y) {}
+      monstro_::monstro_(lista *lista_) : pontuavel() , movel_(lista_) {}
+      amigo_::amigo_(bloco *bloco_, lista *lista_) : pontuavel() , movel_(lista_) {setbloco(bloco_);}
+
+      //criatura::criatura() : pontuavel() {}
+      //criatura::criatura(lista *lista_) : pontuavel() , movel_(lista_) {}
+      //criatura::criatura(bloco *bloco_, lista *lista_) : pontuavel() , movel_(lista_) {setbloco(bloco_);}
+      /*
+      monstro_::monstro_(lista *lista_) : criatura(lista_) {}
+      monstro_::monstro_(bloco *bloco_, lista *lista_) : criatura(bloco_, lista_) {}
+      amigo_::amigo_(bloco *bloco_, lista *lista_) : criatura(bloco_, lista_) {}
+      */
+
+      //void criatura::ativa(bloco *bloco_, lista *lista_) {new amigo_(bloco_, lista_);}
+      //void monstro_::ativa(bloco *bloco_, lista *lista_) {new monstro_(bloco_, lista_);}
+
+      //*** setbloco
+
+      void entidade::setbloco(bloco *bloco_) {bloco_->setBackground(cor()); bloco_->setText(QString("")); bloco_->Entidade(this);}
+      void pontuavel::setbloco(bloco *bloco_) {entidade::setbloco(bloco_); bloco_->setText(QString("%1").arg(this->pontuacao()));}
+
+      void movel_::setbloco(bloco *b) {entidade::setbloco(b); Bloco(b);}
+      //void criatura::setbloco(bloco *b) {pontuavel::setbloco(b); Bloco(b);}
+      void amigo_::setbloco(bloco *b) {pontuavel::setbloco(b); Bloco(b);}
+      void monstro_::setbloco(bloco *b) {pontuavel::setbloco(b); Bloco(b);}
+      void jogador_::setbloco(bloco *b) {pontuavel::setbloco(b); Bloco(b);}
+
+      //***soma
+
+      void pontuavel::soma(pontuavel *ent) {pontuacao(pontuacao() + ent->pontuacao()); delete ent;}
+      void jogador_::soma(pontuavel *ent) {pontuavel::soma(ent); bloco_->jogo()->tela[1]->setText(QString("Pontuacao: %1").arg(this->pontuacao()));}
+
+      //*** mensagens
+
+      QString final_::mensagem() {return QString("Voce venceu!");}
+      QString monstro_::mensagem() {return QString("Voce perdeu!");}
+
       //*** reacoes
 
-      bool livre_::reacao(int x, int y, bloco *inicio) {return inicio->deslocamento(x,y);}
+      bool entidade::acao(param) {return false;}
+      bool entidade::reacao(param) {return false;}
 
-      bool empurravel_::reacao(int x, int y, bloco *inicio) {
+      bool pontuavel::acao(param) {return I.ativo()->Entidade()->reacao(I);}
+      bool pontuavel::reacao(param) {soma((pontuavel*) I.reativo()->Entidade()); return true;}
+      // se ativo tambem for pontuavel vai somar
 
-          if(inicio->deslocado(x,y)->tenta_mover(x,y)) {return inicio->deslocamento(x,y);} else return false;
-      }
+      bool ocupavel_::acao(param) {I.ativo()->deslocamento(I.vetor()); return I._true();}
 
-      bool final_::reacao(int x, int y, bloco *inicio) {return inicio->finaliza("Voce venceu!");}
+      bool empurravel_::acao(param) {if(I.reativo()->tenta_mover(I.vetor())) I._return(ocupavel_::acao(I)); return I._return();}
 
-      bool monstro_::reacao(int x, int y, bloco *inicio) {return inicio->finaliza("Voce perdeu!");}
+      bool final_::acao(param) {if(I.ativo()->Entidade()==(pontuavel*)I.jogo()->jogador)
 
-      bool bonus_::reacao(int x, int y, bloco *inicio) {
+          {I.jogo()->tela[0]->setText(QString(mensagem())); I.jogo()->ativo = false;} return false;}
 
-          if(this->pontuavel::reacao(x,y,inicio)) {return inicio->deslocamento(x,y);} else return false;}
+      bool monstro_::acao(param) {return final_::acao(I);}
+      //bool monstro_::reacao(param) {new monstro_(I.reativo(), I.jogo()->lista_);}
 
-      bool inativo_::reacao(int x, int y, bloco *inicio) {
+      bool bonus_::acao(param) {if(pontuavel::acao(I)) I._return(ocupavel_::acao(I)); return I._return();}
 
-          if(this->pontuavel::reacao(x,y,inicio)) {
+      bool inativo_::acao(param) {if(pontuavel::acao(I)) {I.ativo()->atualiza(); new amigo_(I.reativo(),I.jogo()->lista_);} return false;}
 
-              inicio->entidade_->setbloco(inicio);
+          //criatura *atv = (criatura*) (pontuavel*) I.ativo()->Entidade(); atv->ativa(I.reativo(),I.jogo()->lista_);}
 
-              new amigo_(inicio->deslocado(x,y));
-          }
+      bool amigo_::acao(param) {return empurravel_::acao(I);}
+      //bool amigo_::reacao(param) {}
 
-          return false;
-      }
+      bool jogador_::acao(param) {return false;}
+      //bool jogador_::reacao(param) {}
 
-      bool amigo_::reacao(int x, int y, bloco *inicio) {return false;}
+      //bool criatura::acao(param) {return false;}
 
-      bool jogador_::reacao(int x, int y, bloco *inicio) {return false;}
+//*** lista
 
-//*** jogador
+lista::lista() {entidades = new movel_*[45]; quantidade = 0;}
 
-void jogador_::setbloco(bloco *b) {pontuavel::setbloco(b); bloco_ = b;}
-bool jogador_::soma(bloco *b) {bool return_ = pontuavel::soma(b); bloco_->jogo()->tela[1]->setText(QString("Pontuacao: %1").arg(this->pontuacao())); return return_;}
+void lista::adiciona(movel_ *ent) {if(quantidade < 50) {entidades[quantidade] = ent; quantidade++;}}
 
-QPoint jogador_::posicao() {return bloco_->posicao();}
+lista::~lista() {delete entidades;}
 
 // *** game
 
-void game::criaBloco(int x, int y, entidade *ent) {
+void game::movimento(int x, int y, bloco *inicio) {if (ativo) inicio->tenta_mover(QPoint(x,y)); mudanca();}
 
-    bloco *bloco_ = new bloco();
-    setItem(x,y,bloco_);
-    ent->setbloco(bloco_);
+void game::mudanca() {
+
+    int ctrl = 0;
+    int qt, item;
+    while (ctrl<3) {
+
+        ctrl++;
+        qt = lista_->quantidade;
+        item = QRandomGenerator::global()->bounded(0,qt);
+        int x = QRandomGenerator::global()->bounded(-1,2);
+        int y = QRandomGenerator::global()->bounded(-1,2);
+
+        if(x!=0 || y!=0) lista_->entidades[item]->Bloco()->tenta_mover(QPoint(x,y));
+    }
 }
-
-bloco *game::Bloco(int x, int y) {return (bloco*) item(x,y);}
-
-bloco *game::Bloco(QPoint ponto) {return (bloco*) item(ponto.x(),ponto.y());}
 
 game::game(int rows, int columns, QWidget *parent, QLabel *tela_[2]) : QTableWidget(rows, columns, parent)
 {
 
-livre1 = new livre_();
 obstaculo1 = new obstaculo_();
-//movel1 = new movel_();
 empurravel1 = new empurravel_();
 final1 = new final_();
+//movel1 = new movel_();
 
 lista_ = new lista();
-jogador1 = new jogador_();
+jogador = new jogador_();
+ocupavel = new ocupavel_();
 
 for (int i = 0; i < rows; ++i) {
     for (int j = 0; j < columns; ++j) {
@@ -157,17 +195,17 @@ for (int i = 0; i < rows; ++i) {
 
         if (i==0 || j==0 || i==rows-1 || j==columns-1) criaBloco(i,j, obstaculo1);
 
-        else if (i==1 && j==1) criaBloco(i,j, jogador1);
+        else if (i==1 && j==1) criaBloco(i,j, (pontuavel*) jogador);
 
-        else if (i<3 && j<3) criaBloco(i,j, livre1);
+        else if (i<3 && j<3) criaBloco(i,j, ocupavel);
 
         else if (i==rows-2 && j==columns-2) criaBloco(i,j, final1);
 
-        else if (i>rows-4 && j>columns-4) criaBloco(i,j, livre1);
+        else if (i>rows-4 && j>columns-4) criaBloco(i,j, ocupavel);
 
-        else if ((rand % 21) == 0) criaBloco(i,j, new bonus_(1,4));
+        else if ((rand % 21) == 0) criaBloco(i,j, (pontuavel*) new bonus_(1,4));
 
-        else if ((rand % 19) == 0) criaBloco(i,j, new monstro_(lista_));
+        else if ((rand % 19) == 0) criaBloco(i,j, (pontuavel*) new monstro_(lista_));
 
         else if ((rand % 17) == 0) criaBloco(i,j, new inativo_(1,4));
 
@@ -177,7 +215,7 @@ for (int i = 0; i < rows; ++i) {
 
         else if ((rand % 4) == 0) criaBloco(i,j, empurravel1);
 
-        else criaBloco(i,j, livre1);
+        else criaBloco(i,j, ocupavel);
     }
 }
 
@@ -189,31 +227,5 @@ tela[1] = tela_[1];
 resizeRowsToContents();
 resizeColumnsToContents();
 this->setDisabled(1);
-}
-
-bool game::movimento(int x, int y, bloco *inicio) {
-
-  mudanca();
-
-  if (ativo) {
-
-      return inicio->tenta_mover(x,y);
-  }
-      else {return false;}
-}
-
-void game::mudanca() {
-
-    int ctrl = 0;
-    int qt, item;
-    while (ctrl<3) {
-
-        qt = lista_->quantidade;
-        item = QRandomGenerator::global()->bounded(0,qt);
-
-        lista_->entidades[item]->acao();
-
-        ctrl++;
-    }
 }
 

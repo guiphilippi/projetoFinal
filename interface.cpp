@@ -108,11 +108,11 @@ void Interface::createComandos()
 
 //void Interface::vec00(QPoint *pt) {jogo->movimento(pt->x(),pt->y(),jogo->jogador1);}
 
-void Interface::vec01() {jogo->movimento(1,0,jogo->jogador1->bloco_);}
-void Interface::vec0_1() {jogo->movimento(-1,0,jogo->jogador1->bloco_);}
-void Interface::vec10() {jogo->movimento(0,1,jogo->jogador1->bloco_);}
-void Interface::vec_10() {jogo->movimento(0,-1,jogo->jogador1->bloco_);}
-void Interface::vec_11() {jogo->movimento(1,-1,jogo->jogador1->bloco_);}
-void Interface::vec1_1() {jogo->movimento(-1,1,jogo->jogador1->bloco_);}
-void Interface::vec11() {jogo->movimento(1,1,jogo->jogador1->bloco_);}
-void Interface::vec_1_1() {jogo->movimento(-1,-1,jogo->jogador1->bloco_);}
+void Interface::vec01() {jogo->movimento(1,0,jogo->jogador->bloco_);}
+void Interface::vec0_1() {jogo->movimento(-1,0,jogo->jogador->bloco_);}
+void Interface::vec10() {jogo->movimento(0,1,jogo->jogador->bloco_);}
+void Interface::vec_10() {jogo->movimento(0,-1,jogo->jogador->bloco_);}
+void Interface::vec_11() {jogo->movimento(1,-1,jogo->jogador->bloco_);}
+void Interface::vec1_1() {jogo->movimento(-1,1,jogo->jogador->bloco_);}
+void Interface::vec11() {jogo->movimento(1,1,jogo->jogador->bloco_);}
+void Interface::vec_1_1() {jogo->movimento(-1,-1,jogo->jogador->bloco_);}
