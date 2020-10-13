@@ -2,45 +2,47 @@ Descrição:
 
 Especializações: 
 
-Autonomo(jogo/jogador): faz movimentos aleatorios(ou cotrolados pelo jogador), e armazena sua posição.
+Movel(jogo/jogador): faz movimentos aleatorios(ou cotrolados pelo jogador), e armazena sua posição.
 
 Pontuavel(ativo/passivo): consome(jogador, monstro) ou doa(bonus, inatvo) a pontuação quando tenta se mover para outro bloco ou quando tentam se mover sobre ele.
 
-Comportamentos: <ocupavel> , <obstaculo> , <empurravel> , <finaliza/jogador>
+Final: encerra o jogo.
+
+Comportamentos: <ocupavel> , <obstaculo> , <empurravel> 
 
 Entidades:
 
- - livre[branco]<ocupavel>: qualquer bloco que tentar se mover na direção dele conseguira, e ele assumira o espaço vazio deixado por um movimento.
+ - ocupavel[branco]<ocupavel>: qualquer bloco que tentar se mover na direção dele conseguira, e ele assumira o espaço vazio deixado por um movimento.
 
  - obstaculo[preto]<obstaculo>: impede movimento.
 
- - movel[cinza](autonomo)<obstaculo>: como o obstaculo mas tenta se mover em direções aleatorias e armazena posição. 
+ - movel[cinza](movel)<obstaculo>: como o obstaculo mas tenta se mover em direções aleatorias e armazena posição. 
 
  - empurravel[amarelo]<empurravel>: quando tenta se mover na direção dele ele tenta se mover na mesma direção, se ele conseguir o bloco ocupa o espaço dele.
 
- - final[verde]<finaliza>: se a entidade jogador tenta se mover na direção dele o jogo acaba.
+ - final[verde](final): se a entidade jogador tenta se mover na direção dele o jogo acaba.
 
- - monstro[vermelho](autonomo)(pontuavel-ativo)<finaliza><obstaculo>: 
+ - monstro[vermelho](movel)(pontuavel)(final)<obstaculo>: 
 
 se a entidade jogador tenta se mover na direção dele o jogo acaba (finaliza). tenta se mover em direções aleatorias e armazena posição (autonomo).
                                                   
 se tentar se mover em direção a alguns blocos pontuaveis (bonus, inativo) ele consumira os pontos do outro bloco (pontuavel).
 
- - bonus[ciano](pontuavel-passivo)<ocupavel>: se um bloco pontuavel tenta se mover em direção a ele, ele sera destruido, 
+ - bonus[ciano](pontuavel)<ocupavel>: se um bloco pontuavel tenta se mover em direção a ele, ele sera destruido, 
  
 seus pontos transferidos, e terá seu espaço ocupado.
 
- - inativo[roxo escuro](pontuavel-passivo)<obstaculo>: se um bloco pontuavel tenta se mover em direção a ele sera destruido, 
+ - inativo[roxo escuro](pontuavel)<obstaculo>: se um bloco pontuavel tenta se mover em direção a ele sera destruido, 
 
 seus pontos transferidos, e criara um novo bloco em sua posição.
 
- - amigo[roxo claro](pontuavel)<obstaculo>: criado quando o bloco inativo é destruido, se comporta como um obstaculo (em desenvolvimento).
+ - amigo[roxo claro](movel)(pontuavel)<empurravel>: criado quando o bloco inativo é destruido.
  
- - jogador[azul](autonomo)(pontuavel-ativo)<jogador><obstaculo>:
+ - jogador[azul](movel)(pontuavel)<jogador><obstaculo>:
  
-se tenta se mover na direção de um bloco "<finaliza> (monstro ou final)" o jogo acaba <jogador>. movido pelo jogador e armazena posição (autonomo*).
+se tenta se mover na direção de um bloco "<final> (monstro ou final)" o jogo acaba <jogador>. movido pelo jogador e armazena posição (movel).
                                                   
-se tentar se mover em direção a blocos pontuaveis-passiveis (bonus, inativo) ele consumira os pontos do outro bloco (pontuavel-ativo).
+se tentar se mover em direção a blocos pontuaveis-passiveis (bonus, inativo) ele consumira os pontos do outro bloco (pontuavel).
  
 
 
